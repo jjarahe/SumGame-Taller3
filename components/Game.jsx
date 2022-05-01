@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import Number from './Number';
 
@@ -9,6 +9,7 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
     const [target, setTarget] = useState();
     const [remainingSeconds, setRemainingSeconds] = useState(initialSeconds)
     const [ gameStatus, setGameStatus] = useState('PLAYING');
+    const [ playAgain, setPlayAgain] = useState(0)
     
     const intervalId = useRef();
     
@@ -24,13 +25,12 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
         
         setRandomNumbers(numbers);
         setTarget(target);
-        
+       
         intervalId.current = setInterval(()=> setRemainingSeconds(seconds => seconds - 1), 1000);
         return () => clearInterval(intervalId.current);//Simulacion de componenwillunmount
         
-    }, []);//Primer parametro un arrow function y el segundo un parametro de control
+    }, [playAgain]);//Primer parametro un arrow function y el segundo un parametro de control
    
-    
     useEffect(()=> {
         setGameStatus(()=> getGameStatus());
         if (remainingSeconds === 0 || gameStatus !== 'PLAYING') {
@@ -46,12 +46,31 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
         const sumSelected = selectedNumbers.reduce((acc,cur) => acc + randomNumbers[cur], 0);
         if (remainingSeconds === 0 || sumSelected > target ) {
             return 'LOST'
-        } else if (sumSelected === target) {         
+        } else if (sumSelected === target) {        
                return 'WON'
         } else {
             return 'PLAYING'
         }
     };
+    
+   const reloadGame = () => {
+        setRemainingSeconds(initialSeconds)
+        setGameStatus('PLAYING')
+        setSelectedNumbers([])
+        setPlayAgain( cnt => cnt + 1)  
+   }
+    
+    const PlayAgainButton = () => {
+        if(gameStatus !== 'PLAYING'){
+            return <Button 
+                        title="Play Again" 
+                        onPress={() => {reloadGame()} }
+                        color = 'green'
+                    />
+        } else {
+            return null
+        }
+    }
     
     //const status = gameStatus();
     
@@ -60,6 +79,7 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
             <Text style={styles.target}>{target}</Text>
             <Text style={[styles.target,styles[gameStatus]]}>{gameStatus}</Text>
             <Text>{remainingSeconds}</Text>
+            
             <View style={styles.randomContainer}>
                 {randomNumbers.map((number, index) => (
                                                 <Number key={index} 
@@ -69,8 +89,13 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
                                                 )
                             )
                 }
+                
+            </View>
+            <View style={styles.buttonContainer}>
+                <PlayAgainButton style={styles.button}/>
             </View>
         </View>
+        
     );
 };
 
@@ -87,6 +112,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+    },
+    
+    buttonContainer: {
+       marginTop: 350
     },
     
     PLAYING: {

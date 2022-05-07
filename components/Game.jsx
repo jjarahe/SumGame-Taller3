@@ -2,6 +2,9 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import Number from './Number';
 
+var _ = require('lodash');
+
+
 export default Game = ({ randomNumbersCount, initialSeconds }) => {
     //const target = 10 + Math.floor(40 * Math.random());
     const [randomNumbers, setRandomNumbers] = useState([]);
@@ -13,6 +16,10 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
     
     const intervalId = useRef();
     
+    function shuffle(array) {
+        array.sort(() => Math.random() - 0.5);
+      }
+    
     useEffect(()=> console.log(selectedNumbers), [selectedNumbers])
     
    //Sin Array -> Se ejecuta todo el tiempo
@@ -20,10 +27,10 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
    // Array con datos -> Se ejecuta cuando cambia
    // Return -> Se ejecuta cuando se desmonta
     useEffect(() => {
-        const numbers = Array.from({ length: randomNumbersCount }).map(() => 1 + Math.floor(10 * Math.random()));
+        let numbers = Array.from({ length: randomNumbersCount }).map(() => 1 + Math.floor(10 * Math.random()));
         const target = numbers.slice(0,randomNumbersCount -2).reduce((acc, cur) => acc + cur, 0);
         
-        setRandomNumbers(numbers);
+        setRandomNumbers(_.shuffle(numbers));
         setTarget(target);
        
         intervalId.current = setInterval(()=> setRemainingSeconds(seconds => seconds - 1), 1000);
@@ -81,7 +88,8 @@ export default Game = ({ randomNumbersCount, initialSeconds }) => {
             <Text>{remainingSeconds}</Text>
             
             <View style={styles.randomContainer}>
-                {randomNumbers.map((number, index) => (
+                {   
+                    randomNumbers.map((number, index) => (
                                                 <Number key={index} 
                                                 id={index} number={number} 
                                                 isSelected={isNumberSelected(index) || gameStatus != 'PLAYING'} 
